@@ -1,5 +1,7 @@
 require "active_export/version"
 
 module ActiveExport
-  # Your code goes here...
+  module Csv
+    autoload :Default, 'active_export/csv/default'
+  end
 end

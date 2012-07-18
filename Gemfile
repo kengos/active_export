@@ -11,6 +11,8 @@ group :development, :test do
   gem 'yard'
   gem 'rdiscount'
 
+  gem 'tapp'
+
   gem 'sqlite3'
   gem 'rspec-rails'
   gem 'guard'
