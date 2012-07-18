@@ -5,7 +5,7 @@ require 'spec_helper'
 describe ActiveExport::Csv::Default do
   describe ".export" do
     it do
-      ActiveExport::Csv::Default.export
+      ActiveExport::Csv::Default.export([])
     end
   end
 end

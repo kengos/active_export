@@ -3,7 +3,7 @@
 module ActiveExport
   module Csv
     class Default
-      def self.export
+      def self.export(data)
       end
     end
   end

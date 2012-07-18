@@ -17,6 +17,7 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'guard'
   gem 'guard-rspec'
+  gem 'fuubar'
 
   gem 'libnotify', :require => false
   gem 'rb-inotify', :require => false
