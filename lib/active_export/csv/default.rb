@@ -17,3 +17,7 @@ module ActiveExport
     end
   end
 end
+
+# Usage
+
+# ActiveExport::Csv.(export_setting_name)(data, options)
