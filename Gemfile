@@ -11,7 +11,7 @@ group :development, :test do
   gem 'yard'
   gem 'rdiscount'
 
-  gem 'tapp'
+  gem 'tapp', :git => 'git://github.com/esminc/tapp.git'
 
   gem 'sqlite3'
   gem 'rspec-rails'
