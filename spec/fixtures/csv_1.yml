@@ -1,0 +1,4 @@
+author:
+  - name
+  - 'author.name'
+  - 'price': <%= "my_price_#{1+1}" %>
