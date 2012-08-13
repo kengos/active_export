@@ -10,7 +10,9 @@ module ActiveExport
   class << self
     # @example
     #   ActiveExportconfigure do |config|
-    #     config.sources = { :default => Rails.root.join('config', 'active_export.yml') }
+    #     config.sources = { default: Rails.root.join('config', 'active_export.yml') }
+    #     config.default_csv_optoins = { col_sep: ',', row_sep: "\n", force_quotes: true }
+    #     config.always_reload = true # default false
     #   end
     def configure
       yield configuration
@@ -23,12 +25,31 @@ module ActiveExport
     alias :config :configuration
 
     def [](key)
-      source key
+      source(key)
+    end
+
+    def clear!
+      @source = {}
+      true
+    end
+
+    def load!
+      config.sources.each {|f| source(f) }
+      true
+    end
+
+    def reload!
+      clear!
+      load!
     end
 
     def source(key)
-      @sources ||= {}
-      @sources[key] ||= load!(key)
+      if @configuration.always_reload
+        load!(key)
+      else
+        @sources ||= {}
+        @sources[key] ||= load!(key)
+      end
     end
 
     def include_source?(key)

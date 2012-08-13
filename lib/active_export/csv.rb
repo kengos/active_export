@@ -4,8 +4,11 @@ require 'csv'
 
 module ActiveExport
   class Csv < ::ActiveExport::Base
-    # @param [Array or ActiveRecord::Relation] data
-    # @param [Hash]
+    # @param [Array, ActiveRecord::Relation] data
+    # @param [Symbol, String] source
+    # @param [Symobl, String] namespace
+    # @param [Hash] options ({})
+    # @option options (see http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html)
     # @exmaple
     #   AcriveExport::Csv.export(data, :source, :namespace)
     # @todo refactoring
