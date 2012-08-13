@@ -9,17 +9,17 @@ describe ActiveExport::Base do
   }
 
   after {
-    I18n.locale = @default_locale
     I18n.backend.reload!
+    I18n.locale = @default_locale
   }
 
   describe ".generate_value" do
     let(:author_1) { Author.create!(name: 'author_1') }
     let!(:book_1) { Book.create!(name: 'book_1', author: author_1, price: 1000) }
 
-    let(:export_methods) { %w(name author.name price) }
+    let(:export_methods) { ['name', 'author.name', 'price', 'deleted_at', 'price > 0'] }
     subject { ActiveExport::Base.generate_value(book_1, export_methods) }
-    it { should eql %w(book_1 author_1 1000) }
+    it { should eql ['book_1', 'author_1', '1000', '', 'Yes'] }
   end
 
   describe ".generate_header" do
@@ -47,6 +47,19 @@ describe ActiveExport::Base do
       end
 
       it { should eql ['Title', 'Author Name', 'Price(in tax)'] }
+    end
+  end
+
+  describe ".convert" do
+    it { ActiveExport::Base.convert(nil).should eql '' }
+    context "boolean value" do
+      before do
+        I18n.backend.store_translations :en, active_export: {
+          boolean_label: { yes: 'Yes!', no: 'No!' }
+        }
+      end
+      it { ActiveExport::Base.convert(true).should eql 'Yes!' }
+      it { ActiveExport::Base.convert(false).should eql 'No!' }
     end
   end
 

@@ -1,3 +1,4 @@
+require 'tapp'
 require 'rails/rails_support'
 require 'rspec'
 require 'rspec/rails'

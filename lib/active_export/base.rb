@@ -18,10 +18,22 @@ module ActiveExport
       def generate_value(row, export_methods)
         result = []
         export_methods.each do |f|
-          v = ( row.send(:eval, f) rescue nil )
-          result << ( v.nil? ? '' : v.to_s )
+          result << convert( (row.send(:eval, f) rescue nil) )
         end
         result
+      end
+
+      # Convert value for export string
+      def convert(value)
+        if value.nil?
+          ''
+        elsif value == true && ::ActiveExport.configuration.boolean_label.has_key?(:true)
+          translate(::ActiveExport.configuration.boolean_label[:true], [:boolean_label])
+        elsif value == false && ::ActiveExport.configuration.boolean_label.has_key?(:false)
+          translate(::ActiveExport.configuration.boolean_label[:false], [:boolean_label])
+        else
+          value.to_s
+        end
       end
 
       def translate(key, scope = [])

@@ -10,9 +10,23 @@ module ActiveExport
   class << self
     # @example
     #   ActiveExportconfigure do |config|
+    #     # ActiveExport export configuration files.
     #     config.sources = { default: Rails.root.join('config', 'active_export.yml') }
+    #
+    #     # see CSV.new options 
     #     config.default_csv_optoins = { col_sep: ',', row_sep: "\n", force_quotes: true }
+    #
+    #     # if set 'true', ActiveExport no cached yml data. Every time load yml file.
+    #     # if set 'false', ActiveExport cached yml data.
     #     config.always_reload = true # default false
+    #
+    #     # en.yml or others
+    #     # en:
+    #     #   active_export:
+    #     #     boolean_label:
+    #     #       yes: 'Yes'
+    #     #       no: 'No'
+    #     config.boolean_label = { true: 'yes', false: 'no' }
     #   end
     def configure
       yield configuration
