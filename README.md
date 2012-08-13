@@ -70,15 +70,17 @@ end
 
 Book records:
 
-|_id_|_name_|_author_id_|_price_|_created_at_|
-|_1_|_Ruby_|_1_|_50_|_2012/08/01 00:00:00 UTC_|
-|_2_|_Java_|_2_|_30_|_2012/08/02 00:00:00 UTC_|
+| id | name | author_id | price | created_at |
+|:--:|:----:|:---------:|:-----:|:----------:|
+|  1 | Ruby |         1 |    50 | 2012/08/01 00:00:00 UTC |
+|  2 | Java |         2 |    30 | 2012/08/02 00:00:00 UTC |
 
 Author records:
 
-|_id_|_name_|
-|_1_|_Bob_|
-|_2_|_Alice_|
+| id |  name |
+|:--:|:-----:|
+|  1 |   Bob |
+|  2 | Alice |
 
 en.yml or others:
 
