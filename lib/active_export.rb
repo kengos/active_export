@@ -2,8 +2,6 @@ require "active_export/version"
 require 'active_export/configuration'
 require 'yaml'
 require 'erb'
-require 'i18n'
-require 'active_support'
 
 module ActiveExport
   autoload :Base, 'active_export/base'

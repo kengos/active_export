@@ -1,5 +1,8 @@
 # coding: utf-8
 
+require 'i18n'
+require 'active_support'
+
 module ActiveExport
   class Base
     class << self
@@ -15,7 +18,14 @@ module ActiveExport
         result
       end
 
-      def translate(key)
+      def translate(key, scope = [])
+        defaults = [
+          :"active_export.#{scope.join('.')}.#{key}",
+          :"activerecord.attributes.#{key}",
+          :"activemodel.attributes.#{key}",
+          key.gsub('.', '_').humanize
+        ].tapp
+        I18n.translate(defaults.shift, default: defaults)
       end
     end
   end
