@@ -24,7 +24,7 @@ module ActiveExport
           :"activerecord.attributes.#{key}",
           :"activemodel.attributes.#{key}",
           key.gsub('.', '_').humanize
-        ].tapp
+        ]
         I18n.translate(defaults.shift, default: defaults)
       end
     end
