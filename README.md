@@ -105,6 +105,53 @@ ActiveExport::Csv.export(Book.all, :default, :book)
 # "Java","Alice","20","2012/08/02"
 </pre>
 
+## Export method magic
+
+<pre>
+eval_methods.each do |f|
+  row.send(:eval, f)
+end
+</pre>
+
+'row' is a ActiveRecord(or others) instance.
+
+'eval methods' are String Array loaded from yml file.
+
+ex)
+
+In config/initalizers/active_export.rb:
+
+    sources = { default: Rails.root.join('config', 'active_export.yml') }
+
+In active_export.yml:
+
+    book:
+      - 'name'
+      - 'author.name'
+
+Ruby Script:
+
+````ruby
+data = [Book.new(name: 'PHP', author_id: 1)]
+ActiveExport::Csv(data, :default, :book)
+# this line means:
+#    Csv.generate do |csv|
+#      data.each do |f|
+#        csv << [f.name, f.author.name]
+#      end
+#    end
+````
+
+## YAML file setting example
+
+<pre>
+book:
+  - "author.name"
+  - "price > 0"
+  - "price.to_f / 2.0"
+  - "sprintf("%#b", price)"
+</pre>
+
 ## Contributing
 
 1. Fork it
