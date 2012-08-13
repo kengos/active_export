@@ -5,46 +5,58 @@ require 'active_support'
 
 module ActiveExport
   class Base
-    class << self
-      def generate_header(keys, klass, scope = [])
-        result = []
-        keys.each do |key|
-          key = "#{klass.name.downcase}.#{key}" unless key.include? '.'
-          result << translate(key, scope)
-        end
-        result
-      end
+    attr_accessor :source, :namespace, :options, :config, :eval_methods
 
-      def generate_value(row, export_methods)
-        result = []
-        export_methods.each do |f|
-          result << convert( (row.send(:eval, f) rescue nil) )
-        end
-        result
-      end
+    def initialize(source, namespace, options = {})
+      @source = source
+      @namespace = namespace
+      @options = options
+      @config = ::ActiveExport.configuration.dup
+    end
 
-      # Convert value for export string
-      def convert(value)
-        if value.nil?
-          ''
-        elsif value == true && ::ActiveExport.configuration.boolean_label.has_key?(:true)
-          translate(::ActiveExport.configuration.boolean_label[:true], [:boolean_label])
-        elsif value == false && ::ActiveExport.configuration.boolean_label.has_key?(:false)
-          translate(::ActiveExport.configuration.boolean_label[:false], [:boolean_label])
+    def eval_methods
+      @eval_methods ||= ::ActiveExport[self.source.to_sym][self.namespace.to_s]
+    rescue => e
+      pp e
+      return nil
+    end
+
+    # Convert value for export string
+    def convert(value, options = {})
+      _options = self.config.default_value_labels.merge options
+      if value.nil?
+        if _options[:nil]
+          translate(_options[:nil], [:default_value_labels])
         else
-          value.to_s
+          ''
         end
+      elsif value == ''
+        if _options[:blank]
+          translate(_options[:blank], [:default_value_labels])
+        else
+          ''
+        end
+      elsif value == true && _options[:true]
+        translate(_options[:true], [:default_value_labels])
+      elsif value == false && _options[:false]
+        translate(_options[:false], [:default_value_labels])
+      else
+        value.to_s
       end
+    end
 
-      def translate(key, scope = [])
-        defaults = [
-          :"active_export.#{scope.join('.')}.#{key.gsub('.', '_')}",
-          :"activerecord.attributes.#{key}",
-          :"activemodel.attributes.#{key}",
-          key.gsub('.', '_').humanize
-        ]
-        I18n.translate(defaults.shift, default: defaults)
-      end
+    def translate(key, scope = [])
+      self.class.translate(key, scope)
+    end
+
+    def self.translate(key, scope = [])
+      defaults = [
+        :"active_export.#{scope.join('.')}.#{key.gsub('.', '_')}",
+        :"activerecord.attributes.#{key}",
+        :"activemodel.attributes.#{key}",
+        key.gsub('.', '_').humanize
+      ]
+      I18n.translate(defaults.shift, default: defaults)
     end
   end
 end

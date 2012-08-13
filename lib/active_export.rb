@@ -23,10 +23,12 @@ module ActiveExport
     #     # en.yml or others
     #     # en:
     #     #   active_export:
-    #     #     boolean_label:
+    #     #     default_value_labels:
+    #     #       nil: ''
+    #     #       blank: ''
     #     #       yes: 'Yes'
     #     #       no: 'No'
-    #     config.boolean_label = { true: 'yes', false: 'no' }
+    #     config.default_value_labels = { nil: 'nil', blank: 'blank', true: 'yes', false: 'no' }
     #   end
     def configure
       yield configuration

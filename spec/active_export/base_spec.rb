@@ -13,53 +13,18 @@ describe ActiveExport::Base do
     I18n.locale = @default_locale
   }
 
-  describe ".generate_value" do
-    let(:author_1) { Author.create!(name: 'author_1') }
-    let!(:book_1) { Book.create!(name: 'book_1', author: author_1, price: 1000) }
-
-    let(:export_methods) { ['name', "author.name", 'price', 'deleted_at', 'price > 0'] }
-    subject { ActiveExport::Base.generate_value(book_1, export_methods) }
-    it { should eql ['book_1', 'author_1', '1000', '', 'Yes'] }
-  end
-
-  describe ".generate_header" do
-    let(:keys) { %w(name author.name price) }
-
-    subject { ActiveExport::Base.generate_header(keys, Book, [:default, :book]) }
-
-    context "no language file" do
-      it { should eql ['Book name', 'Author name', 'Book price'] }
-    end
-
-    context "translate" do
-      before do
-        I18n.backend.store_translations :en, activerecord: {
-          attributes: {
-            book: { name: 'name', price: 'Price(in tax)' },
-            author: { name: 'Author Name' }
-          }
-        }
-        I18n.backend.store_translations :en, active_export: {
-          default: {
-            book: { book_name: 'Title' }
-          }
-        }
-      end
-
-      it { should eql ['Title', 'Author Name', 'Price(in tax)'] }
-    end
-  end
-
   describe ".convert" do
-    it { ActiveExport::Base.convert(nil).should eql '' }
     context "boolean value" do
       before do
         I18n.backend.store_translations :en, active_export: {
-          boolean_label: { yes: 'Yes!', no: 'No!' }
+          default_value_labels: { nil: 'Error', blank: 'Blank', yes: 'Yes!', no: 'No!' }
         }
       end
-      it { ActiveExport::Base.convert(true).should eql 'Yes!' }
-      it { ActiveExport::Base.convert(false).should eql 'No!' }
+      let(:base_obj) { ActiveExport::Base.new(:source, :namespace) }
+      it { base_obj.convert(nil).should eql 'Error' }
+      it { base_obj.convert('').should eql 'Blank' }
+      it { base_obj.convert(true).should eql 'Yes!' }
+      it { base_obj.convert(false).should eql 'No!' }
     end
   end
 
@@ -80,14 +45,18 @@ describe ActiveExport::Base do
 
     context "activerecord" do
       before do
-        I18n.backend.store_translations :en, activerecord: { attributes: { author: { name: 'AuthorName' } } }
+        I18n.backend.store_translations :en, activerecord: {
+          attributes: { author: { name: 'AuthorName' } }
+        }
       end
       it { should == 'AuthorName' }
     end
 
     context "activemodel" do
       before do
-        I18n.backend.store_translations :en, activemodel: { attributes: { author: { name: 'Author_Name' } } }
+        I18n.backend.store_translations :en, activemodel: {
+          attributes: { author: { name: 'Author_Name' } }
+        }
       end
       it { should == 'Author_Name' }
     end
