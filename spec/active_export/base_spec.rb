@@ -3,10 +3,17 @@
 require 'spec_helper'
 
 describe ActiveExport::Base do
-  let(:author_1) { Author.create!(name: 'author_1') }
-  let(:author_2) { Author.create!(name: 'author_2') }
+  before {
+    @default_locale = I18n.locale
+  }
+
+  after {
+    I18n.locale = @default_locale
+    I18n.backend.reload!
+  }
 
   describe ".generate_value" do
+    let(:author_1) { Author.create!(name: 'author_1') }
     let!(:book_1) { Book.create!(name: 'book_1', author: author_1, price: 1000) }
 
     let(:export_methods) { %w(name author.name price) }
@@ -14,23 +21,42 @@ describe ActiveExport::Base do
     it { should eql %w(book_1 author_1 1000) }
   end
 
-  describe ".translate" do
-    before { @default_locale = I18n.locale }
-    after {
-      I18n.locale = @default_locale
-      I18n.backend.reload!
-    }
+  describe ".generate_header" do
+    let(:keys) { %w(name author.name price) }
 
+    subject { ActiveExport::Base.generate_header(keys, Book, [:default, :book]) }
+
+    context "no language file" do
+      it { should eql ['Book name', 'Author name', 'Book price'] }
+    end
+
+    context "translate" do
+      before do
+        I18n.backend.store_translations :en, activerecord: {
+          attributes: {
+            book: { name: 'name', price: 'Price(in tax)' },
+            author: { name: 'Author Name' }
+          }
+        }
+        I18n.backend.store_translations :en, active_export: {
+          default: {
+            book: { book_name: 'Title' }
+          }
+        }
+        I18n.locale = :en
+      end
+
+      it { should eql ['Title', 'Author Name', 'Price(in tax)'] }
+    end
+  end
+
+  describe ".translate" do
     let(:i18n_key) { 'author.name' }
     context "active_export" do
       before do
         I18n.backend.store_translations :en, active_export: {
           default: {
-            book: {
-              author: {
-                name: 'author_name'
-              }
-            }
+            book: { author_name: 'author_name' }
           }
         }
       end
