@@ -36,17 +36,3 @@ module ActiveExport
     end
   end
 end
-
-# Usage
-# class MyExport < ActiveExport::Base
-#   csv header: true, label: :i18n
-#   value id: 0, method: 'author.name', label: 'author.name'
-#   value id: 1, method: 'price', format: :number_with_delimiter
-#   value id: 2, method: 'name'
-# end
-#
-# MyExport.export_csv(data)
-#  # => ""
-#
-# OR
-# ActiveExport::Csv.export(data, :author, options)
