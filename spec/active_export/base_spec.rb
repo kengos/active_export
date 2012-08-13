@@ -5,6 +5,7 @@ require 'spec_helper'
 describe ActiveExport::Base do
   before {
     @default_locale = I18n.locale
+    I18n.locale = :en
   }
 
   after {
@@ -43,7 +44,6 @@ describe ActiveExport::Base do
             book: { book_name: 'Title' }
           }
         }
-        I18n.locale = :en
       end
 
       it { should eql ['Title', 'Author Name', 'Price(in tax)'] }
@@ -52,6 +52,8 @@ describe ActiveExport::Base do
 
   describe ".translate" do
     let(:i18n_key) { 'author.name' }
+    subject { ActiveExport::Base.translate('author.name', [:default, :book]) }
+
     context "active_export" do
       before do
         I18n.backend.store_translations :en, active_export: {
@@ -60,40 +62,25 @@ describe ActiveExport::Base do
           }
         }
       end
-
-      it "should return 'author_name'" do
-        I18n.locale = :en
-        ActiveExport::Base.translate('author.name', [:default, :book]).should == 'author_name'
-      end
+      it { should == 'author_name' }
     end
 
     context "activerecord" do
       before do
         I18n.backend.store_translations :en, activerecord: { attributes: { author: { name: 'AuthorName' } } }
       end
-
-      it "should return 'AuthorName" do
-        I18n.locale = :en
-        ActiveExport::Base.translate('author.name', [:default, :book]).should == 'AuthorName'
-      end
+      it { should == 'AuthorName' }
     end
 
     context "activemodel" do
       before do
         I18n.backend.store_translations :en, activemodel: { attributes: { author: { name: 'Author_Name' } } }
       end
-
-      it "should return 'Author_Name" do
-        I18n.locale = :en
-        ActiveExport::Base.translate('author.name').should == 'Author_Name'
-      end
+      it { should == 'Author_Name' }
     end
 
     context "not found" do
-      it "should return 'Author_Name" do
-        I18n.locale = :en
-        ActiveExport::Base.translate('author.name').should == 'Author name'
-      end
+      it { should == 'Author name' }
     end
   end
 end
