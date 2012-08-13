@@ -15,6 +15,6 @@ describe ActiveExport do
   describe '[](key)' do
     subject { ActiveExport[:default] }
     it { should be_kind_of Hash }
-    it { subject['author'].should == ['name', 'author.name', { 'price' => 'my_price_2' }] }
+    it { subject['author'].should == ['name', 'author.name', 'price'] }
   end
 end

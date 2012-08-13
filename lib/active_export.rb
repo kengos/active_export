@@ -2,6 +2,8 @@ require "active_export/version"
 require 'active_export/configuration'
 require 'yaml'
 require 'erb'
+require 'i18n'
+require 'active_support'
 
 module ActiveExport
   autoload :Base, 'active_export/base'
@@ -31,8 +33,12 @@ module ActiveExport
       @sources[key] ||= load!(key)
     end
 
+    def include_source?(key)
+      @configuration.sources.has_key?(key)
+    end
+
     def load!(key)
-      if @configuration.sources.has_key? key
+      if include_source?(key)
         YAML.load(ERB.new(open(@configuration.sources[key]).read).result).to_hash
       else
         raise "Missing '#{key}' in sources"

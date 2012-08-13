@@ -3,10 +3,9 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in active_export.gemspec
 gemspec
 
-gem 'rails', ">= #{ENV['RAILS'] || '3.0.0'}"
-
 group :development, :test do
   gem 'rake',           '~> 0.9.2.2', :require => false
+  gem 'rails', ">= #{ENV['RAILS'] || '3.0.0'}"
 
   gem 'yard'
   gem 'rdiscount'
