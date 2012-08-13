@@ -11,17 +11,31 @@ describe ActiveExport::Csv do
 
     before {
       ActiveExport.configure do |config|
-        config.sources = { :default => fixture_file('csv_1.yml') }
+        config.sources = { default: fixture_file('csv_1.yml') }
+        config.default_csv_options = { col_sep: ',', row_sep: "\n", force_quotes: true }
       end
     }
 
-    subject { ActiveExport::Csv.export(Book.order('id DESC').all, :default, :author) }
-    it {
-      should == <<-EOS
+    context "no options" do
+      subject { ActiveExport::Csv.export(Book.order('id DESC').all, :default, :author) }
+      it {
+        should == <<-EOS
 "Book name","Author name","Book price"
 "book_2","author_2","2000"
 "book_1","author_1","1000"
-      EOS
-    }
+        EOS
+      }
+    end
+
+    context "add some options" do
+      subject { ActiveExport::Csv.export(Book.order('id DESC').all, :default, :author, force_quotes: false, col_sep: ':') }
+      it {
+        should == <<-EOS
+Book name:Author name:Book price
+book_2:author_2:2000
+book_1:author_1:1000
+        EOS
+      }
+    end
   end
 end
