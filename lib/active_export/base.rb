@@ -5,6 +5,17 @@ require 'active_support'
 
 module ActiveExport
   class Base
+    attr_accessor :source_name, :namespace, :label_prefix, :source, :label_keys, :eval_methods
+    attr_reader :config
+    def initialize(source_name, namespace, options = {})
+      @source_name = source_name.to_sym
+      @namespace = namespace.to_sym
+      @config = ::ActiveExport.configuration
+      @label_keys = options.has_key?(:label_keys) ? options[:label_keys] : nil
+      @eval_methods = options.has_key?(:eval_methods) ? options[:eval_methods] : nil
+      @label_prefix = options.has_key?(:label_prefix) ? options[:label_prefix] : nil
+    end
+
     class << self
       def translate(key, scope = [])
         defaults = [
@@ -32,17 +43,6 @@ module ActiveExport
         end
         return label_keys, eval_methods
       end
-    end
-
-    attr_accessor :source_name, :namespace, :label_prefix, :config, :source, :label_keys, :eval_methods
-
-    def initialize(source_name, namespace, options = {})
-      @source_name = source_name.to_sym
-      @namespace = namespace.to_sym
-      @config = ::ActiveExport.configuration
-      @label_keys = options.has_key?(:label_keys) ? options[:label_keys] : nil
-      @eval_methods = options.has_key?(:eval_methods) ? options[:eval_methods] : nil
-      @label_prefix = options.has_key?(:label_prefix) ? options[:label_prefix] : nil
     end
 
     # Convert value for export string
