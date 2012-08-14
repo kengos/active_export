@@ -22,7 +22,8 @@ describe ActiveExport do
       }
       subject { ActiveExport[:default] }
       it { should be_kind_of Hash }
-      it { subject['author'].should == ['name', 'author.name', 'price'] }
+      it { subject['book_1'].should be_present }
+      it { subject[:book_2].should be_present }
     end
 
     context "configuration always_reload is true" do

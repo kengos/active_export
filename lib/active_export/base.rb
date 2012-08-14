@@ -5,58 +5,97 @@ require 'active_support'
 
 module ActiveExport
   class Base
-    attr_accessor :source, :namespace, :config, :eval_methods
+    class << self
+      def translate(key, scope = [])
+        defaults = [
+          :"active_export.#{scope.join('.')}.#{key.to_s.gsub('.', '_')}",
+          :"activerecord.attributes.#{key}",
+          :"activemodel.attributes.#{key}",
+          key.to_s.gsub('.', '_').humanize
+        ]
+        I18n.translate(defaults.shift, default: defaults)
+      end
 
-    def initialize(source, namespace, methods = nil)
-      @source = source
-      @namespace = namespace
-      @config = ::ActiveExport.configuration.dup
-      @eval_methods = methods if methods
+      # @param [Array] methods
+      # @return [Array]
+      def build_label_keys_and_eval_methods(methods)
+        label_keys = []
+        eval_methods = []
+        methods.each do |f|
+          if f.is_a?(Hash)
+            label_keys << f.keys.first
+            eval_methods << f.values.first
+          else
+            label_keys << f
+            eval_methods << f
+          end
+        end
+        return label_keys, eval_methods
+      end
     end
 
-    def eval_methods
-      @eval_methods ||= ::ActiveExport[self.source.to_sym][self.namespace.to_s]
-    rescue => e
-      pp e
-      return nil
+    attr_accessor :source_name, :namespace, :label_prefix, :config, :source, :label_keys, :eval_methods
+
+    def initialize(source_name, namespace, options = {})
+      @source_name = source_name.to_sym
+      @namespace = namespace.to_sym
+      @config = ::ActiveExport.configuration
+      @label_keys = options.has_key?(:label_keys) ? options[:label_keys] : nil
+      @eval_methods = options.has_key?(:eval_methods) ? options[:eval_methods] : nil
+      @label_prefix = options.has_key?(:label_prefix) ? options[:label_prefix] : nil
     end
 
     # Convert value for export string
-    def convert(value, options = {})
-      _options = self.config.default_value_labels.merge options
+    # @todo refactor me
+    def convert(value)
       if value.nil?
-        if _options[:nil]
-          translate(_options[:nil], [:default_value_labels])
-        else
-          ''
-        end
+        translate(:nil, config.default_value_label_scope)
       elsif value == ''
-        if _options[:blank]
-          translate(_options[:blank], [:default_value_labels])
-        else
-          ''
-        end
-      elsif value == true && _options[:true]
-        translate(_options[:true], [:default_value_labels])
-      elsif value == false && _options[:false]
-        translate(_options[:false], [:default_value_labels])
+        translate(:blank, config.default_value_label_scope)
+      elsif value == true
+        translate(:true, config.default_value_label_scope)
+      elsif value == false
+        translate(:false, config.default_value_label_scope)
       else
         value.to_s
       end
     end
 
-    def translate(key, scope = [])
-      self.class.translate(key, scope)
+    def label_keys
+      build_label_keys_and_eval_methods! unless @label_keys
+      @label_keys
     end
 
-    def self.translate(key, scope = [])
-      defaults = [
-        :"active_export.#{scope.join('.')}.#{key.gsub('.', '_')}",
-        :"activerecord.attributes.#{key}",
-        :"activemodel.attributes.#{key}",
-        key.gsub('.', '_').humanize
-      ]
-      I18n.translate(defaults.shift, default: defaults)
+    def eval_methods
+      build_label_keys_and_eval_methods! unless @eval_methods
+      @eval_methods
+    end
+
+    def label_prefix
+      @label_prefix ||= source[:label_prefix]
+    end
+
+    def default_scope
+      [self.source_name, self.namespace]
+    end
+
+    def key_name(key)
+      key.to_s.include?(".") ? key.to_s : "#{label_prefix}.#{key}"
+    end
+
+    def build_label_keys_and_eval_methods!
+      @label_keys, @eval_methods = self.class.build_label_keys_and_eval_methods(source[:methods])
+    end
+
+    def source
+      @source ||= ::ActiveExport[self.source_name][self.namespace]
+    rescue => e
+      # TODO config.no_source_raise_error = true
+      return nil
+    end
+
+    def translate(key, scope = nil)
+      self.class.translate(key, scope || default_scope)
     end
   end
 end

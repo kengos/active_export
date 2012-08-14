@@ -19,16 +19,6 @@ module ActiveExport
     #     # if set 'true', ActiveExport no cached yml data. Every time load yml file.
     #     # if set 'false', ActiveExport cached yml data.
     #     config.always_reload = true # default false
-    #
-    #     # en.yml or others
-    #     # en:
-    #     #   active_export:
-    #     #     default_value_labels:
-    #     #       nil: ''
-    #     #       blank: ''
-    #     #       yes: 'Yes'
-    #     #       no: 'No'
-    #     config.default_value_labels = { nil: 'nil', blank: 'blank', true: 'yes', false: 'no' }
     #   end
     def configure
       yield configuration
@@ -74,7 +64,7 @@ module ActiveExport
 
     def load!(key)
       if include_source?(key)
-        YAML.load(ERB.new(open(@configuration.sources[key]).read).result).to_hash
+         ::ActiveSupport::HashWithIndifferentAccess.new(YAML.load(ERB.new(open(@configuration.sources[key]).read).result).to_hash)
       else
         raise "Missing '#{key}' in sources"
       end

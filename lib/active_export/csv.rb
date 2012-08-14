@@ -14,7 +14,7 @@ module ActiveExport
     # @exmaple
     #   AcriveExport::Csv.export(data, :source, :namespace)
     def self.export(data, source, namespace, options = {})
-      new(source, namespace, options.delete(:methods)).export(data, options)
+      new(source, namespace, options).export(data, options)
     end
 
     def export(data, options = {})
@@ -24,29 +24,24 @@ module ActiveExport
       each_method_name = data.respond_to?(:find_each) ? 'find_each' : 'each'
       # 1.9.2
       CSV.generate(csv_options) do |csv|
-        csv << generate_header(eval_methods, data.first.class, [self.source, self.namespace])
+        csv << generate_header
         data.send(each_method_name) do |f|
-          csv << generate_value(f, eval_methods)
+          csv << generate_value(f)
         end
       end
     end
 
-    def generate_header(keys, klass, scope = [])
-      result = []
-      keys.each do |key|
-        key = "#{klass.name.downcase}.#{key}" unless key.include? '.'
-        result << translate(key, scope)
-      end
-      result
+    def generate_header
+      self.label_keys.inject([]) {|result, key|
+        result << translate(key_name(key))
+      }
     end
 
-    def generate_value(row, export_methods, convert_options = {})
-      result = []
-      export_methods.each do |f|
+    def generate_value(row)
+      self.eval_methods.inject([]){|result, f|
         v = row.send(:eval, f) rescue nil
-        result << convert(v, convert_options)
-      end
-      result
+        result << convert(v)
+      }
     end
   end
 end
