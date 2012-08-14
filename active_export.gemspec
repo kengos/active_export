@@ -4,9 +4,9 @@ require File.expand_path('../lib/active_export/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["kengos"]
   gem.email         = ["kengo@kengos.jp"]
-  gem.description   = %q{export to csv}
-  gem.summary       = %q{export to csv}
-  gem.homepage      = ""
+  gem.description   = %q{Export to CSV from ActiveRecord collections.}
+  gem.summary       = %q{Export to CSV from ActiveRecord collections.}
+  gem.homepage      = "https://github.com/kengos/active_export"
 
   gem.files         = `git ls-files`.split($\)
 
