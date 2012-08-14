@@ -3,6 +3,7 @@
 .config
 .yardoc
 _yardoc
+doc/
 coverage
 tmp
 log/*
