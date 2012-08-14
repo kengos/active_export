@@ -140,22 +140,22 @@ book:
 
 ### I18n field priority
 
-1. "active_export.[source_name].[namespace].(label_prefix_)[key]"
-2. "activerecord.attributes.(label_prefix.)[key]"
-3. "activemodel.attributes.(label_prefix.)[key]"
-4. [key].to_s.gsub(".", "_").humanize
+1. `active_export.#{source_name}.#{namespace}.(label_prefix_)#{key}`
+2. `activerecord.attributes.(label_prefix.)#{key}`
+3. `activemodel.attributes.(label_prefix.)#{key}`
+4. `#{key.to_s.gsub(".", "_").humanize}`
 
 ex)
 <pre>
-key ... "author.name"
-label_prefix ... "book"
-source_name ... "default"
-namespace ... "book_1"
+key ... author.name
+label_prefix ... book
+source_name ... default
+namespace ... book_1
 
-1. "active_export.default.book_1.author_name"
-2. "activerecord.attributes.author.name"
-3. "activemode.attributes.author.name"
-4. "author_name".humanize # => Author name
+1. `active_export.default.book_1.author_name`
+2. `activerecord.attributes.author.name`
+3. `activemode.attributes.author.name`
+4. `author_name".humanize # => Author name`
 </pre>
 
 ex2)
