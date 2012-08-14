@@ -57,6 +57,13 @@ describe ActiveExport::Base do
     it { active_export.convert(false).should eql 'No!' }
   end
 
+  describe "#source" do
+    before {
+      active_export.source_name = :not_found
+    }
+    it { expect { active_export.source }.to raise_error RuntimeError }
+  end
+
   describe ".build_label_keys_and_eval_methods" do
     subject { ActiveExport::Base.build_label_keys_and_eval_methods(params) }
 

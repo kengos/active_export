@@ -90,8 +90,8 @@ module ActiveExport
     def source
       @source ||= ::ActiveExport[self.source_name][self.namespace]
     rescue => e
-      # TODO config.no_source_raise_error = true
-      return nil
+      raise e if config.no_source_raise_error = true
+      return {}
     end
 
     def translate(key, scope = nil)

@@ -19,6 +19,9 @@ module ActiveExport
     #     # if set 'true', ActiveExport no cached yml data. Every time load yml file.
     #     # if set 'false', ActiveExport cached yml data.
     #     config.always_reload = true # default false
+    #
+    #     # if set 'true', not found sources[:source_name] to raise error
+    #     config.no_source_raise_error = false # default
     #   end
     def configure
       yield configuration
