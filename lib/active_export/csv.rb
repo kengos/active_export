@@ -8,9 +8,10 @@ module ActiveExport
     # @param [Symbol, String] source
     # @param [Symobl, String] namespace
     # @param [Hash] options ({})
-    # @option options [Hash] :methods
+    # @option options [Array] :eval_methods
+    # @option options [Array] :label_keys
+    # @option options [String] :label_prefix
     # @option options [Hash] :csv_options (see http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html)
-    # @option options [Hash] :convert_options
     # @exmaple
     #   AcriveExport::Csv.export(data, :source, :namespace)
     def self.export(data, source, namespace, options = {})
