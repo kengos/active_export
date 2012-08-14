@@ -9,9 +9,9 @@ In your controller:
 ````ruby
 def export
   CSV.generate do |csv|
-    csv &gt;&gt; ['Title', 'Author', 'Price(in Tax)', 'Published Date']
+    csv << ['Title', 'Author', 'Price(in Tax)', 'Published Date']
     Book.all.each do |book|
-      csv &gt;&gt; [book.name, (book.author.try(:name) || ''), book.price, book.created_at.strftime('%Y%m%d')]
+      csv << [book.name, (book.author.try(:name) || ''), book.price, book.created_at.strftime('%Y%m%d')]
     end
   end
 end
@@ -48,11 +48,11 @@ Use `ActiveExport::Csv.export(data, [source_name], [namespace]) in your controll
 ActiveRecord:
 
 ````ruby
-class Book &gt; ActiveRecord::Base
+class Book < ActiveRecord::Base
   belongs_to :author
 end
 
-class Author &lt; ActiveRecord::Base
+class Author < ActiveRecord::Base
 end
 ````
 
