@@ -5,13 +5,13 @@ require 'active_support'
 
 module ActiveExport
   class Base
-    attr_accessor :source, :namespace, :options, :config, :eval_methods
+    attr_accessor :source, :namespace, :config, :eval_methods
 
-    def initialize(source, namespace, options = {})
+    def initialize(source, namespace, methods = nil)
       @source = source
       @namespace = namespace
-      @options = options
       @config = ::ActiveExport.configuration.dup
+      @eval_methods = methods if methods
     end
 
     def eval_methods

@@ -8,21 +8,22 @@ module ActiveExport
     # @param [Symbol, String] source
     # @param [Symobl, String] namespace
     # @param [Hash] options ({})
-    # @option options (see http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html)
+    # @option options [Hash] :methods
+    # @option options [Hash] :csv_options (see http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html)
+    # @option options [Hash] :convert_options
     # @exmaple
     #   AcriveExport::Csv.export(data, :source, :namespace)
-    # @todo refactoring
     def self.export(data, source, namespace, options = {})
-      new(source, namespace, options).export(data)
+      new(source, namespace, options.delete(:methods)).export(data, options)
     end
 
-    def export(data)
+    def export(data, options = {})
       return '' if data.length <= 0 && eval_methods.nil?
-      _options = self.config.default_csv_options.merge options
+      csv_options = self.config.default_csv_options.merge( options[:csv_options] || {} )
 
       each_method_name = data.respond_to?(:find_each) ? 'find_each' : 'each'
       # 1.9.2
-      CSV.generate(_options) do |csv|
+      CSV.generate(csv_options) do |csv|
         csv << generate_header(eval_methods, data.first.class, [self.source, self.namespace])
         data.send(each_method_name) do |f|
           csv << generate_value(f, eval_methods)
@@ -39,10 +40,11 @@ module ActiveExport
       result
     end
 
-    def generate_value(row, export_methods)
+    def generate_value(row, export_methods, convert_options = {})
       result = []
       export_methods.each do |f|
-        result << convert( (row.send(:eval, f) rescue nil) )
+        v = row.send(:eval, f) rescue nil
+        result << convert(v, convert_options)
       end
       result
     end

@@ -77,7 +77,10 @@ describe ActiveExport::Csv do
     end
 
     context "add some options" do
-      subject { ActiveExport::Csv.export(Book.order('id DESC').all, :default, :author, force_quotes: false, col_sep: ':') }
+      let(:csv_options) {
+        { force_quotes: false, col_sep: ':'}
+      }
+      subject { ActiveExport::Csv.export(Book.order('id DESC').all, :default, :author, csv_options: csv_options) }
       it {
         should == <<-EOS
 Book name:Author name:Book price
