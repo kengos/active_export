@@ -7,16 +7,16 @@ You do not need to write the dirty code to output the csv in your controller, mo
 In your controller:
 
 ````ruby
-def export
-  CSV.generate do |csv|
-    csv << ['Title', 'Author', 'Price(in Tax)', 'Published Date']
+ActiveExport::Csv.export(Book.all, source_name, namespace)
+
+# it means
+CSV.generate do |csv|
+  csv << ['Title', 'Author', 'Price(in Tax)', 'Published Date']
     Book.all.each do |book|
       csv << [book.name, (book.author.try(:name) || ''), book.price, book.created_at.strftime('%Y%m%d')]
     end
   end
 end
-
-# => ActiveExport::Csv.export(Book.all, source_file_name, namespace)
 ````
 
 ## Installation
@@ -35,13 +35,13 @@ Or install it yourself as:
 
 ## Usage
 
-Add initalizers 'active_export.rb'
+Add initalizers `active_export.rb`
 
-Create 'active_export.yml' And write csv export method
+Create `active_export.yml` And write csv export method
 
 [YAML file format][yaml-file-format]
 
-Use `ActiveExport::Csv.export(data, [source_name], [namespace]) in your controller or others.
+Use `ActiveExport::Csv.export(data, source_name, namespace)` in your controller or others.
 
 ## Example
 
