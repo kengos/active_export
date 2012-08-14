@@ -6,7 +6,7 @@ You do not need to write the dirty code to output the csv in your controller, mo
 
 In your controller:
 
-<pre>
+````ruby
 def export
   CSV.generate do |csv|
     csv &gt;&gt; ['Title', 'Author', 'Price(in Tax)', 'Published Date']
@@ -17,7 +17,7 @@ def export
 end
 
 # => ActiveExport::Csv.export(Book.all, source_file_name, namespace)
-</pre>
+````
 
 ## Installation
 
@@ -37,36 +37,24 @@ Or install it yourself as:
 
 Add initalizers 'active_export.rb'
 
-<pre>
-ActiveExportconfigure do |config|
-  # config.sources = { default: Rails.root.join('config', 'active_export.yml') }
-  # config.default_csv_optoins = { col_sep: ',', row_sep: "\n", force_quotes: true }
-  # config.always_reload = true # default false
-end
-</pre>
-
 Create 'active_export.yml' And write csv export method
 
-ex)
+[YAML file format][yaml-file-format]
 
-<pre>
-book:
-  - 'name'
-  - 'author.name'
-  - 'price'
-  - "created_at.strftime('%Y%m%d')"
-</pre>
+Use `ActiveExport::Csv.export(data, [source_name], [namespace]) in your controller or others.
+
+## Example
 
 ActiveRecord:
 
-<pre>
+````ruby
 class Book &gt; ActiveRecord::Base
   belongs_to :author
 end
 
 class Author &lt; ActiveRecord::Base
 end
-</pre>
+````
 
 Book records:
 
@@ -82,7 +70,7 @@ Author records:
 |  1 |   Bob |
 |  2 | Alice |
 
-en.yml or others:
+`en.yml`:
 
 <pre>
 activerecord:
@@ -95,61 +83,92 @@ activerecord:
       name: 'Author'
 </pre>
 
+`config/initializers/active_export.rb`:
+
+````ruby
+ActiveExportconfigure do |config|
+  config.sources = { default: Rails.root.join('config', 'active_export.yml') }
+  ## option fields
+  # config.default_csv_optoins = { col_sep: ',', row_sep: "\n", force_quotes: true }
+  # config.always_reload = false # default
+  # config.no_source_raise_error = false # default
+end
+````
+
+`config/active_export.yml`:
+
+````
+book:
+  label_prefix: 'book'
+  methods:
+    - name
+    - author.name
+    - price
+    - created_at: creaetd_at.strftime('%Y/%m/%d')
+````
+
 In your controller or others:
 
-<pre>
+````ruby
 ActiveExport::Csv.export(Book.all, :default, :book)
-# =>
+# => CSV string
 # "Title","Author","Price(in Tax)","Published Date"
 # "Ruby","Bob","50","2012/08/01"
 # "Java","Alice","20","2012/08/02"
-</pre>
-
-## Export method magic
-
-<pre>
-eval_methods.each do |f|
-  row.send(:eval, f)
-end
-</pre>
-
-'row' is a ActiveRecord(or others) instance.
-
-'eval methods' are String Array loaded from yml file.
-
-ex)
-
-In config/initalizers/active_export.rb:
-
-    sources = { default: Rails.root.join('config', 'active_export.yml') }
-
-In active_export.yml:
-
-    book:
-      - 'name'
-      - 'author.name'
-
-Ruby Script:
-
-````ruby
-data = [Book.new(name: 'PHP', author_id: 1)]
-ActiveExport::Csv(data, :default, :book)
-# this line means:
-#    Csv.generate do |csv|
-#      data.each do |f|
-#        csv << [f.name, f.author.name]
-#      end
-#    end
 ````
 
-## YAML file setting example
+## YAML file format
 
-<pre>
+```
+[namespace]:
+  label_prefix: [label_prefix]
+  methods:
+    - [method_name]
+    - [label_name]: [method_name]
+    - ...
+```
+
+### Method_name examples
+
+```
 book:
-  - "author.name"
-  - "price > 0"
-  - "price.to_f / 2.0"
-  - "sprintf("%#b", price)"
+  - "author.name" # call [instance].author.name
+  - "price > 0" # call [instance].price > 0 # => true or false
+  - "price.to_f / 2.0" # call [instance].price.to_f / 2.0
+  - "sprintf("%#b", price)" # call sprintf("%#b", [instance].price)
+```
+
+### I18n field priority
+
+1. "active_export.[source_name].[namespace].(label_prefix_)[key]"
+2. "activerecord.attributes.(label_prefix.)[key]"
+3. "activemodel.attributes.(label_prefix.)[key]"
+4. [key].to_s.gsub(".", "_").humanize
+
+ex)
+<pre>
+key ... "author.name"
+label_prefix ... "book"
+source_name ... "default"
+namespace ... "book_1"
+
+1. "active_export.default.book_1.author_name"
+2. "activerecord.attributes.author.name"
+3. "activemode.attributes.author.name"
+4. "author_name".humanize # => Author name
+</pre>
+
+ex2)
+<pre>
+key ... "name"
+label_prefix ... "book"
+source_name ... "default"
+namespace ... "book_1"
+
+1. "active_export.default.book_1.book_name"
+2. "activerecord.attributes.book.name"
+3. "activemode.attributes.book.name"
+4. "book_name".humanize # => Book name
 </pre>
 
 ## Contributing
