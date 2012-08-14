@@ -56,7 +56,7 @@ book_1:author_1:58
     let(:author_1) { Author.create!(name: 'author_1') }
     let!(:book_1) { Book.create!(name: 'book_1', author: author_1, price: 1000) }
     let(:eval_methods) { ['name', "author.name", 'price', 'deleted_at', 'price > 0', 'price > 15000'] }
-    let(:csv_exporter) { ActiveExport::Csv.new(:default, :book_1, eval_methods: eval_methods.tapp) }
+    let(:csv_exporter) { ActiveExport::Csv.new(:default, :book_1, eval_methods: eval_methods) }
 
     before {
       I18n.backend.store_translations :en, active_export: {
