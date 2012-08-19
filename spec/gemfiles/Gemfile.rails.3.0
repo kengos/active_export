@@ -1,10 +1,7 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in active_export.gemspec
-gemspec
-
 group :test do
-  gem 'rails', "3.1.7"
+  gem 'rails', "3.0.16"
 
   gem 'sqlite3'
   gem 'rspec-rails'
