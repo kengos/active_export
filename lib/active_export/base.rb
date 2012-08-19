@@ -18,6 +18,30 @@ module ActiveExport
     end
 
     class << self
+      # Generate Csv String
+      # @param [Array, ActiveRecord::Relation] data
+      # @param [Symbol, String] source
+      # @param [Symobl, String] namespace
+      # @param [Hash] options ({})
+      # @option options [Array] :eval_methods
+      # @option options [Array] :label_keys
+      # @option options [String] :label_prefix
+      # @option options [Hash] :csv_options (see http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html)
+      # @return [String] Csv String
+      def export(data, source, namespace, options = {})
+        new(source, namespace, options).export(data)
+      end
+
+      # Generate Csv File
+      # @param [Array, ActiveRecord::Relation] data
+      # @param [Symbol, String] source YAML File alias name (see ActiveExport::Configuration#sources)
+      # @param [Symbol, String] namespace YAML File namespace
+      # @param [String, Filepath] filename Csv File name
+      # @param [Hash] options ({}) (see .export)
+      def export_file(data, source, namespace, filename, options = {})
+        new(source, namespace, options).export_file(data, filename)
+      end
+
       def translate(key, scope = [])
         defaults = [
           :"active_export.#{scope.join('.')}.#{key.to_s.gsub('.', '_')}",
