@@ -1,4 +1,4 @@
-# ActiveExport
+# ActiveExport [![Build Status](https://secure.travis-ci.org/kengos/active_export.png?branch=master)](http://travis-ci.org/kengos/active_export)[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/kengos/active_export)
 
 ActiveExport generate from ActiveRecord or others to CSV String or CSV file.
 
