@@ -5,15 +5,16 @@ require 'active_support'
 
 module ActiveExport
   class Base
-    attr_accessor :source_name, :namespace, :label_prefix, :source, :label_keys, :eval_methods
+    attr_accessor :source_name, :namespace, :label_prefix, :source, :label_keys, :eval_methods, :options
     attr_reader :config
     def initialize(source_name, namespace, options = {})
       @source_name = source_name.to_sym
       @namespace = namespace.to_sym
       @config = ::ActiveExport.configuration
-      @label_keys = options.has_key?(:label_keys) ? options[:label_keys] : nil
-      @eval_methods = options.has_key?(:eval_methods) ? options[:eval_methods] : nil
-      @label_prefix = options.has_key?(:label_prefix) ? options[:label_prefix] : nil
+      @label_keys = options.has_key?(:label_keys) ? options.delete(:label_keys) : nil
+      @eval_methods = options.has_key?(:eval_methods) ? options.delete(:eval_methods) : nil
+      @label_prefix = options.has_key?(:label_prefix) ? options.delete(:label_prefix) : nil
+      @options = options
     end
 
     class << self
@@ -90,7 +91,7 @@ module ActiveExport
     def source
       @source ||= ::ActiveExport[self.source_name][self.namespace]
     rescue => e
-      raise e if config.no_source_raise_error = true
+      raise e if self.config.no_source_raise_error
       return {}
     end
 

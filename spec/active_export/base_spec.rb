@@ -59,6 +59,10 @@ describe ActiveExport::Base do
 
   describe "#source" do
     before {
+      ActiveExport.configure do |config|
+        config.sources = {  }
+        config.no_source_raise_error = true
+      end
       active_export.source_name = :not_found
     }
     it { expect { active_export.source }.to raise_error RuntimeError }

@@ -4,6 +4,7 @@ require 'csv'
 
 module ActiveExport
   class Csv < ::ActiveExport::Base
+    # Generate Csv String
     # @param [Array, ActiveRecord::Relation] data
     # @param [Symbol, String] source
     # @param [Symobl, String] namespace
@@ -12,23 +13,47 @@ module ActiveExport
     # @option options [Array] :label_keys
     # @option options [String] :label_prefix
     # @option options [Hash] :csv_options (see http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html)
+    # @return [String] Csv String
     # @exmaple
     #   AcriveExport::Csv.export(data, :source, :namespace)
     def self.export(data, source, namespace, options = {})
-      new(source, namespace, options).export(data, options)
+      new(source, namespace, options).export(data)
     end
 
-    def export(data, options = {})
-      return '' if data.length <= 0 && eval_methods.nil?
-      csv_options = self.config.default_csv_options.merge( options[:csv_options] || {} )
+    # Generate Csv File
+    # @param [Array, ActiveRecord::Relation] data
+    # @param [Symbol, String] source YAML File alias name (see ActiveExport::Configuration#sources)
+    # @param [Symbol, String] namespace YAML File namespace
+    # @param [String, Filepath] filename Csv File name
+    # @param [Hash] options ({}) (see .export)
+    # @return [true, false] Successful generate Csv file return true, Filure return false
+    def self.export_file(data, source, namespace, filename, options = {})
+      new(source, namespace, options).export_file(data, filename)
+    end
 
-      each_method_name = data.respond_to?(:find_each) ? 'find_each' : 'each'
-      # 1.9.2
+    def export(data)
       CSV.generate(csv_options) do |csv|
-        csv << generate_header
-        data.send(each_method_name) do |f|
-          csv << generate_value(f)
+        csv << generate_header if header?
+        export_data(data, csv)
+      end
+    end
+
+    def export_file(data, filename, options = {})
+      File.atomic_write(filename) do |file|
+        CSV.open(file, "wb", csv_options) do |csv|
+          csv << generate_header if header?
+          export_data(data, csv)
         end
+      end
+    end
+
+    def export_data(data, exporter)
+      if data.respond_to?(:find_in_batches) && data.respond_to?(:orders) && data.orders.size == 0
+        data.find_in_batches(find_in_batches_options) do |group|
+          group.each{|f| exporter << generate_value(f) }
+        end
+      else
+        data.each{|f| exporter << generate_value(f) }
       end
     end
 
@@ -43,6 +68,18 @@ module ActiveExport
         v = row.send(:eval, f) rescue nil
         result << convert(v)
       }
+    end
+
+    def find_in_batches_options
+      self.options[:find_in_batches_options] || {}
+    end
+
+    def csv_options
+      self.config.default_csv_options.merge( self.options[:csv_options] || {} )
+    end
+
+    def header?
+      { header: true }.merge(self.options)[:header]
     end
   end
 end

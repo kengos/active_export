@@ -37,19 +37,48 @@ describe ActiveExport::Csv do
       }
     end
 
-    context "add some options" do
+    context "add csv_options" do
       let(:csv_options) {
         { force_quotes: false, col_sep: ':'}
       }
-      subject { ActiveExport::Csv.export(Book.order('id DESC').all, :default, :book_1, csv_options: csv_options) }
+      subject { ActiveExport::Csv.export(Book.scoped, :default, :book_1, csv_options: csv_options) }
       it {
         should == <<-EOS
 Book name:Author name:Book price
-book_2:author_2:38
 book_1:author_1:58
+book_2:author_2:38
         EOS
       }
     end
+
+    context "header false" do
+      subject { ActiveExport::Csv.export(Book.scoped, :default, :book_1, header: false) }
+      it {
+        should == <<-EOS
+"book_1","author_1","58"
+"book_2","author_2","38"
+        EOS
+      }
+    end
+
+  end
+
+  describe ".export_file" do
+    let(:filename) { Rails.root.join('tmp', 'test.csv') }
+    before {
+      ActiveExport.configure do |config|
+        config.sources = { default: fixture_file('csv_1.yml') }
+        config.default_csv_options = { col_sep: ',', row_sep: "\n", force_quotes: true }
+      end
+
+      FileUtils.rm(filename) if FileTest.exist?(filename)
+      ActiveExport::Csv.export_file(Book.scoped, :default, :book_1, Rails.root.join('tmp', 'test.csv'))
+    }
+    after {
+      FileUtils.rm(filename) if FileTest.exist?(filename)
+    }
+
+    it { File.read(filename).split("\n").first.should eql %Q("Book name","Author name","Book price") }
   end
 
   describe ".generate_value" do
