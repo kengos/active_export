@@ -5,6 +5,6 @@
 _yardoc
 doc/
 coverage
-tmp
+tmp/*
 log/*
 Gemfile.lock
