@@ -1,19 +1,44 @@
 # ActiveExport
 
-Export to csv from ActiveRecord or others
+ActiveExport generate from ActiveRecord or others to CSV String or CSV file.
 
-You do not need to write the dirty code to output the csv in your controller, model or others.
+You can write the logic of generating CSV to a YAML file.
 
-In your controller:
+Another Support:
+
+  * csv label adapt i18n.
+  * when the value of csv data is null or blank or true or false, change another label<br>
+  ex) nil to '', blank to 'empty', true to 'Yes', false to 'No'<br>
+
+Example:
 
 ````ruby
-ActiveExport::Csv.export(Book.all, source_name, namespace)
+ActiveExport::Csv.export(Book.scoped, source_name, namespace)
+````
 
-# it means
+YAML file
+````
+[namespace]:
+  label_prefix: 'book'
+  methods:
+    - name
+    - author.name
+    - price: '(price * 1.095).ceil.to_i'
+    - created_at.strftime('%Y-%m-%d')
+````
+
+Write the same way without the ActiveExport:
+
+````ruby
 CSV.generate do |csv|
   csv << ['Title', 'Author', 'Price(in Tax)', 'Published Date']
     Book.all.each do |book|
-      csv << [book.name, (book.author.try(:name) || ''), book.price, book.created_at.strftime('%Y%m%d')]
+      csv_data = []
+      csv_data << book.name.blank? ? '' : book.name
+      csv_data << book.author ? book.author.name : ''
+      csv_data << (book.price * 1.095).ceil.to_i
+      csv_data << book.created_at.blank? ? '' : book.created_at.strftime('%Y-%m-%d')
+      csv << csv_data
     end
   end
 end
@@ -37,85 +62,58 @@ Or install it yourself as:
 
 Add initalizers `active_export.rb`
 
+    touch config/initializers/active_export.rb
+
+Write configuration code to `active_export.rb`
+
+````ruby
+  ActiveExportconfigure do |config|
+    config.sources = { default: Rails.root.join('config', 'active_export.yml') }
+    config.default_csv_optoins = { col_sep: ',', row_sep: "\n", force_quotes: true }
+    # config.default_find_in_batches_options = {} # default
+    # config.default_value_label_scope = [:default_value_labels] # default
+    # config.always_reload = false # default
+    # config.no_source_raise_error = false # default
+  end
+````
+
 Create `active_export.yml` And write csv export method
 
-[YAML file format][yaml-file-format]
+    touch config/active_export.yml
 
-Use `ActiveExport::Csv.export(data, source_name, namespace)` in your controller or others.
-
-## Example
-
-ActiveRecord:
-
-````ruby
-class Book < ActiveRecord::Base
-  belongs_to :author
-end
-
-class Author < ActiveRecord::Base
-end
-````
-
-Book records:
-
-| id | name | author_id | price | created_at |
-|:--:|:----:|:---------:|:-----:|:----------:|
-|  1 | Ruby |         1 |    50 | 2012/08/01 00:00:00 UTC |
-|  2 | Java |         2 |    30 | 2012/08/02 00:00:00 UTC |
-
-Author records:
-
-| id |  name |
-|:--:|:-----:|
-|  1 |   Bob |
-|  2 | Alice |
-
-`en.yml`:
-
-<pre>
-activerecord:
-  attributes:
-    book:
-      name: 'Title'
-      price: 'Price(in Tax)'
-      created_at: 'Published Date'
-    author:
-      name: 'Author'
-</pre>
-
-`config/initializers/active_export.rb`:
-
-````ruby
-ActiveExportconfigure do |config|
-  config.sources = { default: Rails.root.join('config', 'active_export.yml') }
-  ## option fields
-  # config.default_csv_optoins = { col_sep: ',', row_sep: "\n", force_quotes: true }
-  # config.always_reload = false # default
-  # config.no_source_raise_error = false # default
-end
-````
-
-`config/active_export.yml`:
+Write Csv generate logic
 
 ````
-book:
+[namespace_1]:
   label_prefix: 'book'
   methods:
-    - name
-    - author.name
-    - price
-    - created_at: creaetd_at.strftime('%Y/%m/%d')
+    - row[0] method
+    - row[1] method
+    ...
+[namespace_2]:
+  label_prefix: ...
+  ...
 ````
 
-In your controller or others:
+Call Export method
 
-````ruby
-ActiveExport::Csv.export(Book.all, :default, :book)
-# => CSV string
-# "Title","Author","Price(in Tax)","Published Date"
-# "Ruby","Bob","50","2012/08/01"
-# "Java","Alice","20","2012/08/02"
-````
+    ActiveExport::Csv.export(Book.scoped, :default, :namespace_1)
+    ActiveExport::Csv.export_file(Book.scoped, :default, :namespace_1, filename)
+
+## ActiveExport::Csv
+
+Support 2 methods:
+
+  * export(data, source_name, namespace, options = {}) ... Generate Csv string
+  * export_file(data, source_name, namespace, filename, options = {}) ... Generate Csv file
+
+options:
+
+  * :eval_methods ... override export method from YAML file.
+  * :label_keys ... override csv header label from YAML file.
+  * :label_prefix ... override csv header label prefix from YAML file.
+  * :csv_options ... Csv generate options.
+  * :header ... false to not export Csv header labels.
 
 ## YAML file format
 
@@ -126,16 +124,6 @@ ActiveExport::Csv.export(Book.all, :default, :book)
     - [method_name]
     - [label_name]: [method_name]
     - ...
-```
-
-### Method_name examples
-
-```
-book:
-  - "author.name" # call [instance].author.name
-  - "price > 0" # call [instance].price > 0 # => true or false
-  - "price.to_f / 2.0" # call [instance].price.to_f / 2.0
-  - "sprintf("%#b", price)" # call sprintf("%#b", [instance].price)
 ```
 
 ### I18n field priority
@@ -165,11 +153,22 @@ label_prefix ... "book"
 source_name ... "default"
 namespace ... "book_1"
 
-1. "active_export.default.book_1.book_name"
-2. "activerecord.attributes.book.name"
-3. "activemode.attributes.book.name"
-4. "book_name".humanize # => Book name
+1. `active_export.default.book_1.book_name`
+2. `activerecord.attributes.book.name`
+3. `activemode.attributes.book.name`
+4. `book_name`.humanize # => Book name
 </pre>
+
+
+### methods examples
+
+```
+book:
+  - "author.name" # call [instance].author.name
+  - "price > 0" # call [instance].price > 0 # => true or false
+  - "price.to_f / 2.0" # call [instance].price.to_f / 2.0
+  - "sprintf("%#b", price)" # call sprintf("%#b", [instance].price)
+```
 
 ## Contributing
 
