@@ -1,6 +1,11 @@
-require 'yard'
-require 'yard/rake/yardoc_task'
+begin
 
-YARD::Rake::YardocTask.new do |t|
-  t.files   = ['lib/**/*.rb']
+  require 'yard'
+  require 'yard/rake/yardoc_task'
+
+  YARD::Rake::YardocTask.new do |t|
+    t.files   = ['lib/**/*.rb']
+  end
+
+rescue Exception
 end
