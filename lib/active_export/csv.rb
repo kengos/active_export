@@ -38,7 +38,7 @@ module ActiveExport
     end
 
     def export_file(data, filename)
-      File.atomic_write(filename) do |file|
+      File.atomic_write(filename.to_s) do |file|
         CSV.open(file, "wb", csv_options) do |csv|
           csv << generate_header if header?
           export_data(data, csv)
