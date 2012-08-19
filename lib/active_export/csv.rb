@@ -75,7 +75,7 @@ module ActiveExport
     end
 
     def find_in_batches_options
-      self.options[:find_in_batches_options] || {}
+      self.config.default_find_in_batches_options.merge( self.options[:find_in_batches_options] || {} )
     end
 
     def csv_options
