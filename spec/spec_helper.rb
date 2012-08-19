@@ -1,4 +1,8 @@
-require 'tapp'
+begin
+  require 'tapp'
+rescue Exception
+end
+
 require 'rails/rails_support'
 require 'rspec'
 require 'rspec/rails'
