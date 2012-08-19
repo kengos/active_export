@@ -17,15 +17,15 @@ ActiveExport::Csv.export(Book.scoped, source_name, namespace)
 ````
 
 YAML file
-````
-[namespace]:
+<pre>
+namespace:
   label_prefix: 'book'
   methods:
     - name
     - author.name
     - price: '(price * 1.095).ceil.to_i'
     - created_at.strftime('%Y-%m-%d')
-````
+</pre>
 
 Write the same way without the ActiveExport:
 
@@ -67,33 +67,33 @@ Add initalizers `active_export.rb`
 Write configuration code to `active_export.rb`
 
 ````ruby
-  ActiveExportconfigure do |config|
-    config.sources = { default: Rails.root.join('config', 'active_export.yml') }
-    config.default_csv_optoins = { col_sep: ',', row_sep: "\n", force_quotes: true }
-    # config.default_find_in_batches_options = {} # default
-    # config.default_value_label_scope = [:default_value_labels] # default
-    # config.always_reload = false # default
-    # config.no_source_raise_error = false # default
-  end
+ActiveExportconfigure do |config|
+  config.sources = { default: Rails.root.join('config', 'active_export.yml') }
+  # config.default_csv_optoins = { col_sep: ',', row_sep: "\n", force_quotes: true }
+  # config.default_find_in_batches_options = {} # default
+  # config.default_value_label_scope = [:default_value_labels] # default
+  # config.always_reload = false # default
+  # config.no_source_raise_error = false # default
+end
 ````
 
 Create `active_export.yml` And write csv export method
 
     touch config/active_export.yml
 
-Write Csv generate logic
+Write Csv generate logic to `active_export.yml`
 
-````
-[namespace_1]:
+<pre>
+namespace_1:
   label_prefix: 'book'
   methods:
-    - row[0] method
-    - row[1] method
+    - method
+    - method
     ...
-[namespace_2]:
+namespace_2:
   label_prefix: ...
   ...
-````
+</pre>
 
 Call Export method
 
@@ -104,27 +104,26 @@ Call Export method
 
 Support 2 methods:
 
-  * export(data, source_name, namespace, options = {}) ... Generate Csv string
-  * export_file(data, source_name, namespace, filename, options = {}) ... Generate Csv file
+  * `export(data, source_name, namespace, options = {})` ... Generate Csv string
+  * `export_file(data, source_name, namespace, filename, options = {})` ... Generate Csv file
 
 options:
 
-  * :eval_methods ... override export method from YAML file.
-  * :label_keys ... override csv header label from YAML file.
-  * :label_prefix ... override csv header label prefix from YAML file.
-  * :csv_options ... Csv generate options.
-  * :header ... false to not export Csv header labels.
+  * `:eval_methods` ... override export method from YAML file.
+  * `:label_keys` ... override csv header label from YAML file.
+  * `:label_prefix` ... override csv header label prefix from YAML file.
+  * `:csv_options` ... Csv generate options.
+  * `:header` ... false to not export Csv header labels.
 
 ## YAML file format
 
-```
-[namespace]:
-  label_prefix: [label_prefix]
+<pre>
+namespace:
+  label_prefix: label_prefix
   methods:
-    - [method_name]
-    - [label_name]: [method_name]
-    - ...
-```
+    - method_name
+    - label_name: method_name
+</pre>
 
 ### I18n field priority
 
