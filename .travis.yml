@@ -1,0 +1,13 @@
+rvm:
+  - 1.9.2
+  - 1.9.3
+  - ruby-head
+  - rbx-19mode
+gemfile:
+  - spec/gemfiles/Gemfile.rails.3.0
+  - spec/gemfiles/Gemfile.rails.3.1
+  - spec/gemfiles/Gemfile.rails.3.2
+  - spec/gemfiles/Gemfile.rails.head
+branches:
+  only:
+    - master

@@ -5,7 +5,7 @@ gemspec
 
 group :development, :test do
   gem 'rake',           '~> 0.9.2.2', :require => false
-  gem 'rails', ">= #{ENV['RAILS'] || '3.0.0'}"
+  gem 'rails', ">= 3.0.0"
 
   gem 'yard'
   gem 'rdiscount'
