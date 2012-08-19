@@ -7,7 +7,6 @@ gemfile:
   - spec/gemfiles/Gemfile.rails.3.0
   - spec/gemfiles/Gemfile.rails.3.1
   - spec/gemfiles/Gemfile.rails.3.2
-  - spec/gemfiles/Gemfile.rails.head
 branches:
   only:
     - master
