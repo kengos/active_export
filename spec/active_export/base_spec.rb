@@ -4,17 +4,9 @@ require 'spec_helper'
 
 describe ActiveExport::Base do
   before {
-    @default_locale = I18n.locale
-    I18n.locale = :en
-
     ActiveExport.configure do |config|
       config.sources = { default: fixture_file('csv_1.yml') }
     end
-  }
-
-  after {
-    I18n.backend.reload!
-    I18n.locale = @default_locale
   }
 
   let(:active_export) { ActiveExport::Base.new('default', 'book_2') }
@@ -89,9 +81,7 @@ describe ActiveExport::Base do
     context "active_export" do
       before do
         I18n.backend.store_translations :en, active_export: {
-          default: {
-            book: { author_name: 'author_name' }
-          }
+          default: { book: { author_name: 'author_name' } }
         }
       end
       it { should == 'author_name' }

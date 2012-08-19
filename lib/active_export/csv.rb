@@ -26,7 +26,6 @@ module ActiveExport
     # @param [Symbol, String] namespace YAML File namespace
     # @param [String, Filepath] filename Csv File name
     # @param [Hash] options ({}) (see .export)
-    # @return [true, false] Successful generate Csv file return true, Filure return false
     def self.export_file(data, source, namespace, filename, options = {})
       new(source, namespace, options).export_file(data, filename)
     end
@@ -38,17 +37,21 @@ module ActiveExport
       end
     end
 
-    def export_file(data, filename, options = {})
+    def export_file(data, filename)
       File.atomic_write(filename) do |file|
         CSV.open(file, "wb", csv_options) do |csv|
           csv << generate_header if header?
           export_data(data, csv)
         end
       end
+      filename
     end
 
+    # Export data to exporter
+    # @param [Array, ActiveRecord::Relation] data Export target data
+    # @param [CSV, Array, String] exporter CSV class or Array class, or String class (should support '<<' accessor)
     def export_data(data, exporter)
-      if data.respond_to?(:find_in_batches) && data.respond_to?(:orders) && data.orders.size == 0
+      if data.respond_to?(:find_in_batches) && data.respond_to?(:orders) && data.orders.blank? && data.respond_to?(:taken) && data.taken.blank?
         data.find_in_batches(find_in_batches_options) do |group|
           group.each{|f| exporter << generate_value(f) }
         end
@@ -57,6 +60,7 @@ module ActiveExport
       end
     end
 
+    protected
     def generate_header
       self.label_keys.inject([]) {|result, key|
         result << translate(key_name(key))

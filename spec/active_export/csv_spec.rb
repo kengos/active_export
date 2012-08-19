@@ -3,16 +3,6 @@
 require 'spec_helper'
 
 describe ActiveExport::Csv do
-  before {
-    @default_locale = I18n.locale
-    I18n.locale = :en
-  }
-
-  after {
-    I18n.backend.reload!
-    I18n.locale = @default_locale
-  }
-
   describe ".export" do
     let(:author_1) { Author.create!(name: 'author_1') }
     let(:author_2) { Author.create!(name: 'author_2') }
@@ -81,6 +71,43 @@ book_2:author_2:38
     it { File.read(filename).split("\n").first.should eql %Q("Book name","Author name","Book price") }
   end
 
+  describe "#export_data" do
+    let(:csv_exporter) { ActiveExport::Csv.new(:default, :book_1) }
+    let!(:book_1) { Book.create!(name: 'book_1', author: nil, price: 58) }
+    let!(:book_2) { Book.create!(name: 'book_2', author: nil, price: 58) }
+    let!(:book_3) { Book.create!(name: 'book_2', author: nil, price: 58) }
+
+    it "should not call find_in_batches when has order" do
+      obj = Book.order('id ASC')
+      obj.should_not_receive(:find_in_batches)
+      obj.should_receive(:each)
+      csv_exporter.send(:export_data, obj, [])
+    end
+
+
+    it "should not call find_in_batches when has limit" do
+      obj = Book.limit(1)
+      obj.should_not_receive(:find_in_batches)
+      obj.should_receive(:each)
+      csv_exporter.send(:export_data, obj, [])
+    end
+
+    it "should not call find_in_batches when specified obj is not ActiveRecord::Relation" do
+      obj = [Book.first]
+      obj.should_not_receive(:find_in_batches)
+      obj.should_receive(:each)
+      csv_exporter.send(:export_data, obj, [])
+    end
+
+    it "should call find_in_batches" do
+      obj = Book.scoped
+      obj.should_receive(:find_in_batches).with({batch_size: 1})
+      obj.should_not_receive(:each)
+      csv_exporter.stub(:find_in_batches_options).and_return({batch_size: 1})
+      csv_exporter.send(:export_data, obj, [])
+    end
+  end
+
   describe ".generate_value" do
     let(:author_1) { Author.create!(name: 'author_1') }
     let!(:book_1) { Book.create!(name: 'book_1', author: author_1, price: 1000) }
@@ -92,7 +119,7 @@ book_2:author_2:38
         default_value_labels: { nil: 'not found', blank: 'Blank', true: 'Yes!', false: 'No!' }
       }
     }
-    subject { csv_exporter.generate_value(book_1) }
+    subject { csv_exporter.send(:generate_value, book_1) }
     it { should eql ['book_1', 'author_1', '1000', 'not found', 'Yes!', 'No!'] }
   end
 
@@ -100,11 +127,8 @@ book_2:author_2:38
     let(:label_keys) { %w(name author.name price) }
     let(:csv_exporter) { ActiveExport::Csv.new(:default, :book_1, label_keys: label_keys, label_prefix: 'book') }
 
-    subject { csv_exporter.generate_header }
-
-    context "no language file" do
-      it { should eql ['Book name', 'Author name', 'Book price'] }
-    end
+    subject { csv_exporter.send(:generate_header) }
+    it { should eql ['Book name', 'Author name', 'Book price'] }
 
     context "translate" do
       before do

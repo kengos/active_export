@@ -21,9 +21,13 @@ RSpec.configure do |config|
 
   config.before(:each) do
     DatabaseCleaner.start
+    @default_locale = I18n.locale
+    I18n.locale = :en
   end
 
   config.after(:each) do
+    I18n.backend.reload!
+    I18n.locale = @default_locale
     DatabaseCleaner.clean
   end
 end
