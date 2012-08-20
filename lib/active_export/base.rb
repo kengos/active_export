@@ -70,6 +70,19 @@ module ActiveExport
       end
     end
 
+    # Export data to exporter
+    # @param [Array, ActiveRecord::Relation] data Export target data
+    # @param [Object] Object needs to support '<<' accessor
+    def export_data(data, exporter)
+      if data.respond_to?(:find_in_batches) && data.respond_to?(:orders) && data.orders.blank? && data.respond_to?(:taken) && data.taken.blank?
+        data.find_in_batches(find_in_batches_options) do |group|
+          group.each{|f| exporter << generate_value(f) }
+        end
+      else
+        data.each{|f| exporter << generate_value(f) }
+      end
+    end
+
     # Convert value for export string
     # @todo refactor me
     def convert(value)
@@ -121,6 +134,25 @@ module ActiveExport
 
     def translate(key, scope = nil)
       self.class.translate(key, scope || default_scope)
+    end
+
+    protected
+
+    def generate_header
+      self.label_keys.inject([]) {|result, key|
+        result << translate(key_name(key))
+      }
+    end
+
+    def generate_value(row)
+      self.eval_methods.inject([]){|result, f|
+        v = row.send(:eval, f) rescue nil
+        result << convert(v)
+      }
+    end
+
+    def find_in_batches_options
+      self.config.default_find_in_batches_options.merge( self.options[:find_in_batches_options] || {} )
     end
   end
 end

@@ -6,6 +6,7 @@ require 'erb'
 module ActiveExport
   autoload :Base, 'active_export/base'
   autoload :Csv, 'active_export/csv'
+  autoload :Yaml, 'active_export/yaml'
 
   class << self
     # @example
