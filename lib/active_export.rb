@@ -7,6 +7,7 @@ module ActiveExport
   autoload :Base, 'active_export/base'
   autoload :Csv, 'active_export/csv'
   autoload :Yaml, 'active_export/yaml'
+  autoload :Xml, 'active_export/xml'
 
   class << self
     # @example
