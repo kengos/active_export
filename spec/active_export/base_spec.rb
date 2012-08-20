@@ -74,6 +74,43 @@ describe ActiveExport::Base do
     end
   end
 
+  describe "#export_data" do
+    let(:csv_exporter) { ActiveExport::Base.new(:default, :book_1) }
+    let!(:book_1) { Book.create!(name: 'book_1', author: nil, price: 58) }
+    let!(:book_2) { Book.create!(name: 'book_2', author: nil, price: 58) }
+    let!(:book_3) { Book.create!(name: 'book_2', author: nil, price: 58) }
+
+    it "should not call find_in_batches when has order" do
+      obj = Book.order('id ASC')
+      obj.should_not_receive(:find_in_batches)
+      obj.should_receive(:each)
+      csv_exporter.send(:export_data, obj, [])
+    end
+
+
+    it "should not call find_in_batches when has limit" do
+      obj = Book.limit(1)
+      obj.should_not_receive(:find_in_batches)
+      obj.should_receive(:each)
+      csv_exporter.send(:export_data, obj, [])
+    end
+
+    it "should not call find_in_batches when specified obj is not ActiveRecord::Relation" do
+      obj = [Book.first]
+      obj.should_not_receive(:find_in_batches)
+      obj.should_receive(:each)
+      csv_exporter.send(:export_data, obj, [])
+    end
+
+    it "should call find_in_batches" do
+      obj = Book.scoped
+      obj.should_receive(:find_in_batches).with({batch_size: 1})
+      obj.should_not_receive(:each)
+      csv_exporter.stub(:find_in_batches_options).and_return({batch_size: 1})
+      csv_exporter.send(:export_data, obj, [])
+    end
+  end
+
   describe ".translate" do
     let(:i18n_key) { 'author.name' }
     subject { ActiveExport::Base.translate('author.name', [:default, :book]) }
