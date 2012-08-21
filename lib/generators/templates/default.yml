@@ -1,0 +1,21 @@
+# Using Xml export, you need write `xml_format:`
+# Example:
+# book_1:
+#   label_prefix: 'book'
+#   methods:
+#     - name
+#     - author.name
+#     - price: 'price * 1.095'
+#   xml_format:
+#     encoding: 'UTF-8'
+#     header: |
+#       <?xml version="1.0" encoding="UTF-8"?>
+#       <records>
+#     footer: |
+#       </records>
+#     body: |
+#         <book>
+#           <name>%%name%%</name>
+#           <author_name>%%author.name%%</author_name>
+#           <price>%%price%%</price>
+#         </book>

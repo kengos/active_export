@@ -11,7 +11,7 @@ module ActiveExport
 
   class << self
     # @example
-    #   ActiveExportconfigure do |config|
+    #   ActiveExport.configure do |config|
     #     # ActiveExport export configuration files.
     #     config.sources = { default: Rails.root.join('config', 'active_export.yml') }
     #
