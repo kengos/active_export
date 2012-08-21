@@ -5,7 +5,7 @@
 
 ActiveExport generate CSV/XML/YAML String or CSV/XML/YAML file.
 
-You can write the logic of generating to a YAML file.
+You can write the logic of generating csv or xml, yaml to a YAML file.
 
 Another Support:
 
@@ -13,11 +13,35 @@ Another Support:
   * when the value of csv data is null or blank or true or false, change another label<br>
   ex) nil to '', blank to 'empty', true to 'Yes', false to 'No'<br>
 
-Example:
+## Installation
+
+Add this line to your application's Gemfile:
+
+    gem 'active_export'
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install active_export
+
+Generate the config initializer file and `default.yml`
+
+    $ rails g active_export:install
+
+## Example
 
 ````ruby
 ActiveExport::Csv.export(Book.scoped, source_name, namespace)
+# => csv string
+# "Title","AuthorName","Price(in tax)","Published"
+# "Ruby","Bob","28","2012-08-01"
+# "Rails","Alice","18","2012-07-01"
 ````
+
+  Price(in tax) `28` is (book.price * 1.095).ceil.to_i result.
 
 YAML file
 <pre>
@@ -47,73 +71,7 @@ CSV.generate do |csv|
 end
 ````
 
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'active_export'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install active_export
-
 ## Usage
-
-Add initalizers `active_export.rb`
-
-    touch config/initializers/active_export.rb
-
-Write configuration code to `active_export.rb`
-
-````ruby
-ActiveExport.configure do |config|
-  config.sources = { default: Rails.root.join('config', 'active_export.yml') }
-  # config.default_csv_optoins = { col_sep: ',', row_sep: "\n", force_quotes: true }
-  # config.default_find_in_batches_options = {} # default
-  # config.default_value_label_scope = [:default_value_labels] # default
-  # config.always_reload = false # default
-  # config.no_source_raise_error = false # default
-end
-````
-
-Create `active_export.yml` And write csv export method
-
-    touch config/active_export.yml
-
-Write Csv generate logic to `active_export.yml`
-
-````
-namespace_1:
-  label_prefix: 'book'
-  methods:
-    - method
-    - method
-    ...
-  # If using Xml export
-  xml_format:
-    encoding: 'UTF-8'
-    header: |
-      <?xml version="1.0" encoding="UTF-8"?>
-      <records>
-    footer: |
-      </records>
-    body: |
-      <book>
-        <name>%%name%%</name>
-        <author_name>%%author.name%%</author_name>
-        <price>%%price%%</price>
-      </book>
-
-namespace_2:
-  label_prefix: ...
-  ...
-````
-
-Call Export method
 
 ```ruby
 # Exporting Csv String
@@ -192,7 +150,28 @@ namespace:
   methods:
     - method_name
     - label_name: method_name
+  # If using Xml export
+  xml_format:
+    encoding: 'UTF-8'
+    header: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <records>
+    footer: |
+      </records>
+    body: |
+      <record>
+        <name>%%label_name%%</name>
+      </record>
+
+namespace_2:
+  label_prefix: ...
+  ...
+````
 </pre>
+
+### xml_format:
+
+TODO
 
 ### I18n field priority
 
