@@ -1,8 +1,11 @@
-# ActiveExport [![Build Status](https://secure.travis-ci.org/kengos/active_export.png?branch=master)](http://travis-ci.org/kengos/active_export)[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/kengos/active_export)
+# ActiveExport
 
-ActiveExport generate from ActiveRecord or others to CSV String or CSV file.
+[![Build Status](https://secure.travis-ci.org/kengos/active_export.png?branch=master)](http://travis-ci.org/kengos/active_export)
+[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/kengos/active_export)
 
-You can write the logic of generating CSV to a YAML file.
+ActiveExport generate CSV/XML/YAML String or CSV/XML/YAML file.
+
+You can write the logic of generating to a YAML file.
 
 Another Support:
 
@@ -67,7 +70,7 @@ Add initalizers `active_export.rb`
 Write configuration code to `active_export.rb`
 
 ````ruby
-ActiveExportconfigure do |config|
+ActiveExport.configure do |config|
   config.sources = { default: Rails.root.join('config', 'active_export.yml') }
   # config.default_csv_optoins = { col_sep: ',', row_sep: "\n", force_quotes: true }
   # config.default_find_in_batches_options = {} # default
@@ -90,6 +93,19 @@ namespace_1:
     - method
     - method
     ...
+  # If using Xml export
+  xml_format:
+    encoding: 'UTF-8'
+    header: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <records>
+    footer: |
+      </records>
+    body: |
+      <name>%%name%%</name>
+      <author_name>%%author.name%%</author_name>
+      <price>%%price%%</price>
+
 namespace_2:
   label_prefix: ...
   ...
@@ -97,8 +113,25 @@ namespace_2:
 
 Call Export method
 
-    ActiveExport::Csv.export(Book.scoped, :default, :namespace_1)
-    ActiveExport::Csv.export_file(Book.scoped, :default, :namespace_1, filename)
+```ruby
+# Exporting Csv String
+ActiveExport::Csv.export(Book.scoped, source_name, namespace)
+
+# Exporting Csv File
+ActiveExport::Csv.export_file(Book.scoped, source_name, namespace, filename)
+
+# Exporting Xml String
+ActiveExport::Xml.export(Book.scoped, source_name, namespace)
+
+# Exporting Xml File
+ActiveExport::Xml.export_file(Book.scoped, source_name, namespace, filename)
+
+# Exporting Yaml String
+ActiveExport::Yaml.export(Book.scoped, source_name, namespace)
+
+# Exporting Yaml File
+ActiveExport::Yaml.export_file(Book.scoped, source_name, namespace, filename)
+```
 
 ## ActiveExport::Csv
 
@@ -114,6 +147,32 @@ options:
   * `:label_prefix` ... override csv header label prefix from YAML file.
   * `:csv_options` ... Csv generate options.
   * `:header` ... false to not export Csv header labels.
+
+## ActiveExport::Xml
+
+Support 2 methods:
+
+  * `ActiveExport::Xml.export(Book.scoped, source_name, namespace)` ... Generate Xml string
+  * `ActiveExport::Xml.export_file(Book.scoped, source_name, namespace, filename)` ... Generate Xml file
+
+options:
+
+  * TODO
+
+## ActiveExport::Yaml
+
+Support 2 methods:
+
+  * `ActiveExport::Yaml.export(Book.scoped, source_name, namespace)` ... Generate Yaml string
+  * `ActiveExport::Yaml.export_file(Book.scoped, source_name, namespace, filename)` ... Generate Yaml file
+
+options:
+
+  * TODO
+
+features:
+
+  * exporting i18n labels
 
 ## YAML file format
 
