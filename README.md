@@ -41,10 +41,11 @@ ActiveExport::Csv.export(Book.scoped, source_name, namespace)
 # "Rails","Alice","18","2012-07-01"
 ````
 
-  Price(in tax) `28` is (book.price * 1.095).ceil.to_i result.
+  Price(in tax) `28` is `(book.price * 1.095).ceil.to_i` result.
 
-YAML file
-<pre>
+YAML file:
+
+````
 namespace:
   label_prefix: 'book'
   methods:
@@ -52,7 +53,7 @@ namespace:
     - author.name
     - price: '(price * 1.095).ceil.to_i'
     - created_at.strftime('%Y-%m-%d')
-</pre>
+````
 
 Write the same way without the ActiveExport:
 
