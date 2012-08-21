@@ -86,7 +86,7 @@ Create `active_export.yml` And write csv export method
 
 Write Csv generate logic to `active_export.yml`
 
-<pre>
+````
 namespace_1:
   label_prefix: 'book'
   methods:
@@ -102,14 +102,16 @@ namespace_1:
     footer: |
       </records>
     body: |
-      <name>%%name%%</name>
-      <author_name>%%author.name%%</author_name>
-      <price>%%price%%</price>
+      <book>
+        <name>%%name%%</name>
+        <author_name>%%author.name%%</author_name>
+        <price>%%price%%</price>
+      </book>
 
 namespace_2:
   label_prefix: ...
   ...
-</pre>
+````
 
 Call Export method
 
@@ -148,6 +150,10 @@ options:
   * `:csv_options` ... Csv generate options.
   * `:header` ... false to not export Csv header labels.
 
+features:
+
+  * Support encoding
+
 ## ActiveExport::Xml
 
 Support 2 methods:
@@ -158,6 +164,10 @@ Support 2 methods:
 options:
 
   * TODO
+
+features:
+
+  * Support encoding
 
 ## ActiveExport::Yaml
 
