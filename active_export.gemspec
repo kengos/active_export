@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency("activesupport", ">= 3.0.0")
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
-  gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
+  gem.test_files    = gem.files.grep(%r{^(spec)/})
   gem.name          = "active_export"
   gem.require_paths = ["lib"]
   gem.version       = ActiveExport::VERSION

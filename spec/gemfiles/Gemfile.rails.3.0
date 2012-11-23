@@ -4,6 +4,7 @@ group :test do
   gem 'rails', "3.0.17"
 
   gem 'sqlite3'
+  gem 'rspec'
   gem 'rspec-rails'
   gem 'factory_girl_rails'
   gem 'database_cleaner'

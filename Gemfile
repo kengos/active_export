@@ -13,6 +13,7 @@ group :development, :test do
   gem 'tapp', :git => 'git://github.com/esminc/tapp.git'
 
   gem 'sqlite3'
+  gem 'rspec'
   gem 'rspec-rails'
   gem 'factory_girl_rails'
   gem 'database_cleaner'
